@@ -39,12 +39,8 @@
   import { getThirdPartyConfig } from '@/api/modules';
   import { defaultThirdPartyConfigMap } from '@/config/business';
   import useLocalForage from '@/hooks/useLocalForage';
-  import useModal from '@/hooks/useModal.js';
-  import useLicenseStore from '@/store/modules/setting/license.js';
 
   const { t } = useI18n();
-  const { openModal } = useModal();
-  const licenseStore = useLicenseStore();
   const { setItem, getItem } = useLocalForage();
   const fullList = [
     // {
@@ -95,10 +91,6 @@
   }
 
   onBeforeMount(async () => {
-    if (!licenseStore.hasLicense()) {
-      openModal(licenseStore.getNoLicenseModalConfig());
-      return;
-    }
     await init();
     loadActiveDashboard();
   });
