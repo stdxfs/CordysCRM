@@ -32,6 +32,6 @@ Java 使用四空格缩进，包名统一置于 `cn.cordys` 下；类名使用 P
 
 ## 二开治理（强制）
 
-本 Fork 的治理基线、上游同步流程和官方文件登记见 `governance/`、`UPSTREAM_MODIFICATIONS.md` 与 `docs/governance/upstream-sync.md`。二开优先级固定为：配置、扩展点、独立模块、事件/Hook、适配器、局部覆盖、官方核心修改。新增业务默认不修改官方 Core；修改前必须在 OpenSpec 提案中说明扩展不可行原因，并登记到 `UPSTREAM_MODIFICATIONS.md`。
+本 Fork 的治理基线与流程见 `governance/`、`UPSTREAM_MODIFICATIONS.md` 和 `docs/governance/upstream-sync.md`。优先配置、现有扩展点、独立模块、事件/Hook、适配器。允许必要、局部、可测试、可回退的官方补丁：在 PR 和登记说明取舍即可，不为避免几行补丁预建通用框架。
 
-不得改写已发布的 Migration；修复必须新增按版本排序的脚本。不得在业务 PR 中顺带升级核心依赖、批量格式化官方项目或重构无关官方代码；依赖升级与官方同步均使用独立 PR。开发前读取相关 OpenSpec 变更和 ADR，完成后更新任务、验证记录和必要文档。
+不得改写已应用的本地 Migration；新增脚本版本必须唯一且顺序正确。不得顺带升级依赖、批量格式化或无关重构；依赖升级与官方同步使用独立 PR。重要功能、跨模块和复杂升级使用 OpenSpec，长期架构决定使用 ADR；小 Bug、文案、样式无需单独提案或 Issue（覆盖上文的通用讨论要求）。简短 PR 说明目的、官方文件/数据库影响与测试即可。不适用项标记 N/A。代码合并不等同部署。

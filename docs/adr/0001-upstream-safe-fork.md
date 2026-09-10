@@ -6,7 +6,7 @@
 
 ## Decision
 
-以 `governance/upstream-baseline.env` 中的官方 commit 作为机器检查基线。对基线文件的 M/D/R 差异必须进入登记清单；业务源码默认不允许存在活跃差异。
+以 `governance/upstream-baseline.env` 中的官方 commit 作为机器检查基线。官方文件修改必须登记。单人流程修订：允许必要、局部、可测试、可回退的业务补丁，重要架构变化才要求 OpenSpec/ADR；不以修改比例作为准入条件。保留此前治理提交作为历史。
 
 ## Alternatives
 

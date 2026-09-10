@@ -1,50 +1,21 @@
 name: Upstream Sync Gate
-
 on:
-  pull_request:
-    branches: [develop]
   workflow_dispatch:
     inputs:
       upstream_ref:
-        description: Official tag, branch, or commit to validate
+        description: Official ref or SHA for merge preview (not build or deployment approval)
         required: true
         default: main
-
 permissions:
   contents: read
-
 jobs:
-  upstream-sync:
-    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'upstream-sync'
-    name: upstream-sync
+  preview:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-          cache: maven
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: Check merge feasibility and report impact
-        run: |
-          set -euo pipefail
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            . governance/upstream-baseline.env
-            candidate_ref="$UPSTREAM_COMMIT"
-          else
-            candidate_ref='${{ inputs.upstream_ref }}'
-          fi
-          scripts/governance/check-upstream-merge.sh "$candidate_ref"
-      - name: Run backend integration tests
-        run: ./mvnw -f backend/pom.xml -pl crm -am test
-      - name: Build frontend
-        run: |
-          corepack enable
-          corepack prepare pnpm@10.34.5 --activate
-          pnpm --dir frontend install --frozen-lockfile
-          pnpm --dir frontend --filter @cordys/web build
+      - name: Report merge feasibility and official migration impact
+        env:
+          CANDIDATE: ${{ inputs.upstream_ref }}
+        run: scripts/governance/check-upstream-merge.sh "$CANDIDATE"

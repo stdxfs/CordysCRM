@@ -14,6 +14,14 @@ test -f "$allowlist"
 test -f "$registry"
 
 failures=0
+scope=${1:-committed}
+case "$scope" in
+  committed) comparison=("$UPSTREAM_COMMIT" HEAD) ;;
+  staged) comparison=(--cached "$UPSTREAM_COMMIT") ;;
+  worktree) comparison=("$UPSTREAM_COMMIT") ;;
+  *) echo "Scope must be committed, staged or worktree" >&2; exit 1 ;;
+esac
+changes=$(git diff --name-status --no-renames "${comparison[@]}")
 while IFS=$'\t' read -r status path; do
   [[ -n "$status" ]] || continue
   case "$status" in
@@ -28,7 +36,7 @@ while IFS=$'\t' read -r status path; do
       failures=1
       ;;
   esac
-done < <(git diff --name-status --find-renames "${UPSTREAM_COMMIT}...HEAD")
+done <<< "$changes"
 
 while IFS= read -r path; do
   [[ -n "$path" && "${path:0:1}" != "#" ]] || continue
@@ -42,4 +50,4 @@ if (( failures )); then
   exit 1
 fi
 
-echo "Upstream modification registration passed for ${UPSTREAM_COMMIT}."
+echo "Upstream modification registration passed for ${UPSTREAM_COMMIT}; scope=$scope."

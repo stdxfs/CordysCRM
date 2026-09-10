@@ -54,7 +54,7 @@
 - 首个新领域必须先通过 OpenSpec 变更定义独立模块、公开 Service/API、权限、审计、状态机、Migration 与测试策略。
 - 跨模块只能经公开 Service 或领域 API 协作，禁止直接访问其他领域 Mapper。
 - 业务模块优先发布领域事件；外部 SDK 必须位于 Adapter/Gateway 后方，不能直接进入 Domain Service。
-- 修改官方后端文件前必须说明配置、扩展点、事件、适配器和独立模块为何不可行，并同步登记 `UPSTREAM_MODIFICATIONS.md`。
+- 必要的局部官方补丁在 PR 说明替代方案取舍并登记 `UPSTREAM_MODIFICATIONS.md`；小修复无需单独 OpenSpec，不为避免补丁提前建立通用框架。
 
 ## Java 与实现约定
 
