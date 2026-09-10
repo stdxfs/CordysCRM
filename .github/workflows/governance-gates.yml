@@ -78,7 +78,9 @@ jobs:
         with:
           node-version: 20
       - name: Enable pnpm
-        run: corepack enable
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.34.5 --activate
       - name: Install locked frontend dependencies
         run: pnpm --dir frontend install --frozen-lockfile
       - name: Type-check and build web

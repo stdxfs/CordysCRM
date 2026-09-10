@@ -45,5 +45,6 @@ jobs:
       - name: Build frontend
         run: |
           corepack enable
+          corepack prepare pnpm@10.34.5 --activate
           pnpm --dir frontend install --frozen-lockfile
           pnpm --dir frontend --filter @cordys/web build
