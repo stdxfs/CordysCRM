@@ -30,8 +30,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
-          cache-dependency-path: frontend/pnpm-lock.yaml
       - name: Check merge feasibility and report impact
         run: |
           set -euo pipefail
