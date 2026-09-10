@@ -501,11 +501,13 @@
   import { defaultThirdPartyConfigMap, platformType } from '@/config/business';
   import useModal from '@/hooks/useModal';
   import { useAppStore } from '@/store';
+  import useLicenseStore from '@/store/modules/setting/license.js';
   import { hasAnyPermission } from '@/utils/permission';
 
   const { t } = useI18n();
   const Message = useMessage();
   const appStore = useAppStore();
+  const licenseStore = useLicenseStore();
   const { openModal } = useModal();
   const activePlatformTab = ref<CompanyTypeEnum>(CompanyTypeEnum.WECOM);
 
@@ -635,12 +637,20 @@
   });
 
   function handleEdit(item: IntegrationItem) {
+    if (item.type === 'DE' && !licenseStore.hasLicense()) {
+      openModal(licenseStore.getNoLicenseModalConfig());
+      return;
+    }
     currentTitle.value = item.title;
     currentIntegration.value = { ...item };
     showEditIntegrationModal.value = true;
   }
 
   async function handleSyncDE(item: IntegrationItem) {
+    if (item.type === 'DE' && !licenseStore.hasLicense()) {
+      openModal(licenseStore.getNoLicenseModalConfig());
+      return;
+    }
     try {
       loading.value = true;
       await syncDE();
