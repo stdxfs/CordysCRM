@@ -11,6 +11,7 @@
 | `AGENTS.md` | 将扩展优先、Migration 与上游修改规则提供给所有编码入口 | Governance | 低 | 治理脚本；回退本文件改动 |
 | `backend/AGENTS.md` | 限制未来 ERP/Travel 业务进入官方 `crm` 模块 | Governance | 低 | PR 审查；回退本文件改动 |
 | `frontend/AGENTS.md` | 约束官方页面改动与扩展槽优先级 | Governance | 低 | PR 审查；回退本文件改动 |
+| `frontend/.gitignore` | 跟踪 `pnpm-lock.yaml`，使 CI 的锁定依赖安装可复现 | Build governance | 低 | 锁文件检查；恢复忽略规则 |
 | `.github/PULL_REQUEST_TEMPLATE.md` | 增加二开准入问题 | Governance | 低 | PR 创建检查；回退模板改动 |
 | `.github/workflows/codecov.yml` | 移除继承的官方 Codecov 工作流 | Fork automation isolation | 中 | 统一治理门禁；从上游恢复该文件 |
 | `.github/workflows/frontend-build.yml` | 移除重复的继承前端检查 | Fork automation isolation | 低 | 统一治理门禁；从上游恢复该文件 |
