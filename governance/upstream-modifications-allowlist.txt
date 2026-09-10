@@ -1,0 +1,12 @@
+# Paths tracked in the official baseline that are intentionally changed for Fork governance.
+# Every path requires a matching active entry in UPSTREAM_MODIFICATIONS.md.
+.github/PULL_REQUEST_TEMPLATE.md
+.github/workflows/build-and-push-base.yml
+.github/workflows/build-and-push.yml
+.github/workflows/codecov.yml
+.github/workflows/frontend-build.yml
+.github/workflows/sync2gitee.yml
+AGENTS.md
+backend/AGENTS.md
+frontend/AGENTS.md
+frontend/.gitignore

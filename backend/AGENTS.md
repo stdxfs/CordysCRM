@@ -48,6 +48,14 @@
   - 通过明确的 Service 边界协作。
   - Controller 不应直接调用其他领域的 Mapper。
 
+## 二开边界
+
+- `crm` 只承载 Cordys 原有 CRM 领域；ERP、Travel 和外部系统适配不得无规划进入该模块。
+- 首个新领域必须先通过 OpenSpec 变更定义独立模块、公开 Service/API、权限、审计、状态机、Migration 与测试策略。
+- 跨模块只能经公开 Service 或领域 API 协作，禁止直接访问其他领域 Mapper。
+- 业务模块优先发布领域事件；外部 SDK 必须位于 Adapter/Gateway 后方，不能直接进入 Domain Service。
+- 修改官方后端文件前必须说明配置、扩展点、事件、适配器和独立模块为何不可行，并同步登记 `UPSTREAM_MODIFICATIONS.md`。
+
 ## Java 与实现约定
 
 - 使用 Java 21 和四空格缩进。
@@ -103,4 +111,3 @@
 - 已运行受影响模块测试。
 - 公共框架、权限或跨领域变更已运行完整后端测试。
 - 配置、日志和测试资源中不含真实凭据或客户数据。
-
