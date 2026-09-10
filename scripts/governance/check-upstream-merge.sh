@@ -14,7 +14,8 @@ if git remote get-url "$remote_name" >/dev/null 2>&1; then
 else
   git remote add "$remote_name" "$UPSTREAM_URL"
 fi
-git fetch --no-tags "$remote_name" "$candidate_ref:refs/remotes/${remote_name}/candidate"
+git remote set-url --push "$remote_name" DISABLED
+git fetch --no-tags "$remote_name" "+${candidate_ref}:refs/remotes/${remote_name}/candidate"
 candidate="${remote_name}/candidate"
 merge_base=$(git merge-base HEAD "$candidate")
 report=$(mktemp)

@@ -25,6 +25,7 @@ jobs:
           set -euo pipefail
           . governance/upstream-baseline.env
           git remote add governance-upstream "$UPSTREAM_URL" 2>/dev/null || git remote set-url governance-upstream "$UPSTREAM_URL"
+          git remote set-url --push governance-upstream DISABLED
           git fetch --no-tags governance-upstream "$UPSTREAM_COMMIT"
       - name: Verify OpenSpec artifacts
         run: npx --yes @fission-ai/openspec@1.10.0 validate --all --strict
@@ -45,6 +46,7 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.head_ref }}" = "upstream-sync" ]; then
             . governance/upstream-baseline.env
             git remote add governance-upstream "$UPSTREAM_URL" 2>/dev/null || git remote set-url governance-upstream "$UPSTREAM_URL"
+            git remote set-url --push governance-upstream DISABLED
             git fetch --no-tags governance-upstream "$UPSTREAM_COMMIT"
             scripts/governance/verify-migrations.sh "$UPSTREAM_COMMIT"
           elif [ "${{ github.event_name }}" = "pull_request" ]; then
