@@ -19,6 +19,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Fetch declared upstream baseline for an upstream sync PR
+        if: github.event_name == 'pull_request' && github.head_ref == 'upstream-sync'
+        run: |
+          set -euo pipefail
+          . governance/upstream-baseline.env
+          git remote add governance-upstream "$UPSTREAM_URL" 2>/dev/null || git remote set-url governance-upstream "$UPSTREAM_URL"
+          git fetch --no-tags governance-upstream "$UPSTREAM_COMMIT"
       - name: Verify OpenSpec artifacts
         run: npx --yes @fission-ai/openspec@1.10.0 validate --all --strict
       - name: Verify upstream modification registration
@@ -35,7 +42,12 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
+          if [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.head_ref }}" = "upstream-sync" ]; then
+            . governance/upstream-baseline.env
+            git remote add governance-upstream "$UPSTREAM_URL" 2>/dev/null || git remote set-url governance-upstream "$UPSTREAM_URL"
+            git fetch --no-tags governance-upstream "$UPSTREAM_COMMIT"
+            scripts/governance/verify-migrations.sh "$UPSTREAM_COMMIT"
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
             scripts/governance/verify-migrations.sh "$BASE_SHA"
           else
             scripts/governance/verify-migrations.sh HEAD^

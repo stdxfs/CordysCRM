@@ -33,9 +33,15 @@ jobs:
           cache: pnpm
           cache-dependency-path: frontend/pnpm-lock.yaml
       - name: Check merge feasibility and report impact
-        env:
-          UPSTREAM_REF: ${{ inputs.upstream_ref || 'main' }}
-        run: scripts/governance/check-upstream-merge.sh "$UPSTREAM_REF"
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            . governance/upstream-baseline.env
+            candidate_ref="$UPSTREAM_COMMIT"
+          else
+            candidate_ref='${{ inputs.upstream_ref }}'
+          fi
+          scripts/governance/check-upstream-merge.sh "$candidate_ref"
       - name: Run backend integration tests
         run: ./mvnw -f backend/pom.xml -pl crm -am test
       - name: Build frontend
