@@ -1,6 +1,8 @@
 # 上游修改登记
 
-基线：`1Panel-dev/CordysCRM` 的 `11ddfef84c49fce62bc4847d21df618b2b213964`（`main`，2026-09-10）。
+基线：`1Panel-dev/CordysCRM` 的 `8221b91c9f665d401b48353a4bbf48a33b1e3d3e`（`main`，2026-09-10）。此前基线为 `11ddfef84c49fce62bc4847d21df618b2b213964`。
+
+本次官方自身改写 1.9.1.2 迁移以新增日志索引，作为官方差异记录，不伪装成本地补丁。旧库 checksum 不兼容仍未修复；候选仅以独立新开发库验证，不自动升级已有本地或服务器数据库。详见 docs/governance/upstream-8221-validation.md。
 
 规则：修改、删除或重命名该基线中存在的官方文件前，必须先更新本文件和 `governance/upstream-modifications-allowlist.txt`。业务源码必须说明为何配置、扩展点、事件、适配器或独立模块不可行；缺少登记会被 CI 拒绝。
 

@@ -80,6 +80,41 @@ class FormulaCompletionServiceTest {
     }
 
     @Test
+    void createCalculatesFormulaSerialNumberPrefixFromCurrentFieldValue() {
+        InputField region = field(new InputField(), "region", "所属区域", "INPUT");
+        SerialNumberField serialNumber = field(
+                new SerialNumberField(), "quotationNo", "报价编号", "SERIAL_NUMBER");
+        serialNumber.setPrefixType(SerialNumberField.FORMULA);
+        serialNumber.setFormula(formula(fn("CONCATENATE", fieldNode("region"), literal("-", "string"))));
+        Map<String, BaseModuleFieldValue> values = new LinkedHashMap<>();
+        values.put("region", new BaseModuleFieldValue("region", "华东"));
+
+        Map<String, Object> calculated = service.complete(List.of(region, serialNumber), values,
+                true, businessKey -> null, (businessKey, value) -> { });
+
+        assertEquals("华东-", values.get("quotationNo").getFieldValue());
+        assertEquals("华东-", calculated.get("quotationNo"));
+    }
+
+    @Test
+    void updateKeepsPersistedSerialNumberWithoutRecalculatingPrefixFormula() {
+        InputField region = field(new InputField(), "region", "所属区域", "INPUT");
+        SerialNumberField serialNumber = field(
+                new SerialNumberField(), "quotationNo", "报价编号", "SERIAL_NUMBER");
+        serialNumber.setPrefixType(SerialNumberField.FORMULA);
+        serialNumber.setFormula(formula(fn("CONCATENATE", fieldNode("region"), literal("-", "string"))));
+        Map<String, BaseModuleFieldValue> values = new LinkedHashMap<>();
+        values.put("region", new BaseModuleFieldValue("region", "华南"));
+        values.put("quotationNo", new BaseModuleFieldValue("quotationNo", "华东-0001"));
+
+        Map<String, Object> calculated = service.complete(List.of(region, serialNumber), values,
+                false, businessKey -> null, (businessKey, value) -> { });
+
+        assertEquals("华东-0001", values.get("quotationNo").getFieldValue());
+        assertTrue(calculated.isEmpty());
+    }
+
+    @Test
     void updateFormulaDoesNotReuseSubmittedFormulaResult() {
         InputNumberField amount = field(new InputNumberField(), "amount", "金额", "INPUT_NUMBER");
         FormulaField doubled = numberFormula("doubled", "两倍金额",
@@ -185,6 +220,22 @@ class FormulaCompletionServiceTest {
                         true, businessKey -> null, (businessKey, value) -> { }));
 
         assertTrue(exception.getMessage().contains("循环依赖"));
+    }
+
+    @Test
+    void rejectsCrossScopeFormulaDependencyBeforeMutatingValues() {
+        FormulaField top = numberFormula("top", "顶层", literal(2, "number"));
+        FormulaField child = numberFormula("child", "子表计算", fieldNode("top"));
+        SubField table = field(new SubField(), "table", "子表", "SUB_PRODUCT");
+        table.setSubFields(List.of(child));
+        Map<String, BaseModuleFieldValue> values = new LinkedHashMap<>();
+        values.put("top", new BaseModuleFieldValue("top", 99));
+        assertThrows(FormulaEvaluationException.class, () -> service.complete(List.of(top, table), values,
+                false, key -> null, (key, value) -> { }));
+        assertEquals(99, values.get("top").getFieldValue());
+        top.setFormula(formula(fn("SUM", fieldNode("table.child"))));
+        assertThrows(FormulaEvaluationException.class, () -> service.complete(List.of(top, table), values,
+                false, key -> null, (key, value) -> { }));
     }
 
     @Test
