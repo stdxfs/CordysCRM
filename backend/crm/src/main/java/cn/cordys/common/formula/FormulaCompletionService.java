@@ -22,7 +22,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /**
- * 在业务保存前根据实时表单补全公式字段。调用方只提供当前资源和字段值，公式及类型均来自表单定义。
+ * 为 MCP 专用预计算提供表单公式求值，不接入 CRM 普通业务保存生命周期。
  */
 @Slf4j
 @Service
@@ -71,8 +71,8 @@ public class FormulaCompletionService {
     }
 
     /**
-     * 只计算当前没有值的公式字段。用于 HTTP 请求前置补全：前端已经计算的值保持不变，
-     * MCP 等未提交公式值的调用方才由服务端补齐。
+     * 仅补齐空值的显式求值变体，不挂接 HTTP 或业务保存入口。
+     * MCP 专用预计算使用 complete，按完整输入重新计算。
      */
     public Map<String, Object> completeMissing(
             List<BaseField> fields,
@@ -100,6 +100,33 @@ public class FormulaCompletionService {
 
         LocalDateTime evaluationNow = LocalDateTime.now(clock);
         Map<String, BaseField> runtimeFieldMap = buildRuntimeFieldMap(fields);
+        // 必须在写任何结果前验证所有定义，不能让错误分支或悬空引用变成空值。
+        for (BaseField field : fields) {
+            String formula = formulaOf(field);
+            if (StringUtils.isNotBlank(formula)) {
+                formulaEngine.validateDefinition(formula, runtimeFieldMap.keySet());
+            }
+            if (field instanceof SubField subField && subField.getSubFields() != null) {
+                Set<String> rowIds = new HashSet<>(runtimeFieldMap.keySet());
+                subField.getSubFields().forEach(sub -> rowIds.add(runtimeFieldId(sub)));
+                for (BaseField sub : subField.getSubFields()) {
+                    String subFormula = formulaOf(sub);
+                    if (StringUtils.isNotBlank(subFormula)) {
+                        formulaEngine.validateDefinition(subFormula, rowIds);
+                        Set<String> localIds = new HashSet<>();
+                        subField.getSubFields().forEach(child -> localIds.add(runtimeFieldId(child)));
+                        for (String reference : formulaEngine.referencedFieldIds(subFormula)) {
+                            BaseField dependency = runtimeFieldMap.get(reference);
+                            if (!localIds.contains(reference) && dependency != null
+                                    && StringUtils.isNotBlank(formulaOf(dependency))) {
+                                // 当前分组拓扑只支持行内依赖；跨层计算字段会读到旧值，必须拒绝。
+                                throw new FormulaEvaluationException("UNSUPPORTED_CROSS_SCOPE_DEPENDENCY");
+                            }
+                        }
+                    }
+                }
+            }
+        }
         Map<String, FormulaFieldMetadata> metadata = buildMetadata(runtimeFieldMap);
         Map<String, Object> runtimeValues = buildRuntimeValues(fields, fieldValueMap, businessValueReader);
 
@@ -131,6 +158,7 @@ public class FormulaCompletionService {
                 continue;
             }
             List<FormulaTarget> targets = subField.getSubFields().stream()
+                    .filter(sub -> createMode || !sub.isSerialNumber())
                     .map(sub -> formulaTarget(sub, runtimeFieldId(sub)))
                     .filter(java.util.Objects::nonNull)
                     .toList();
@@ -176,6 +204,7 @@ public class FormulaCompletionService {
     ) {
         List<FormulaTarget> targets = fields.stream()
                 .filter(field -> !(field instanceof SubField))
+                .filter(field -> createMode || !field.isSerialNumber())
                 .map(field -> formulaTarget(field, field.getId()))
                 .filter(java.util.Objects::nonNull)
                 .toList();
@@ -211,7 +240,12 @@ public class FormulaCompletionService {
                     BaseField field = runtimeFieldMap.get(fieldId);
                     return field == null ? rawValue : displayValueResolver.resolve(field, rawValue);
                 },
-                (code, message) -> log.warn("Formula evaluation warning: code={}, detail={}", code, message),
+                (code, message) -> {
+                    if ("INVALID_IR".equals(code) || "UNKNOWN_FUNCTION".equals(code)) {
+                        throw new FormulaEvaluationException(code);
+                    }
+                    log.warn("Formula evaluation warning: code={}, detail={}", code, message);
+                },
                 createMode);
     }
 
@@ -277,6 +311,10 @@ public class FormulaCompletionService {
     }
 
     private String formulaOf(BaseField field) {
+        if (field instanceof cn.cordys.crm.system.dto.field.SerialNumberField serialField
+                && Strings.CI.equals(serialField.getPrefixType(), "formula")) {
+            return serialField.getFormula();
+        }
         if (field instanceof FormulaField formulaField) {
             return formulaField.getFormula();
         }
@@ -351,11 +389,16 @@ public class FormulaCompletionService {
             return rawValue;
         }
         try {
+            if (field instanceof cn.cordys.crm.system.dto.field.DatasourceField source) {
+                return java.util.Objects.requireNonNull(cn.cordys.common.util.CommonBeanFactory
+                        .getBean(FormulaReferenceValueService.class)).resolve(source, rawValue);
+            }
             AbstractModuleFieldResolver resolver = ModuleFieldResolverFactory.getResolver(field.getType());
+            if (!"".equals(rawValue)) resolver.validate(field, rawValue);
             String storedValue = resolver.convertToString(field, rawValue);
             return resolver.transformToValue(field, storedValue);
         } catch (RuntimeException e) {
-            return rawValue;
+            throw new FormulaEvaluationException("DISPLAY_VALUE_RESOLUTION_FAILED", e);
         }
     }
 
