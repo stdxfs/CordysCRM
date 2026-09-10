@@ -6,4 +6,4 @@ main 仍要求 PR 和 required、限制管理员、禁止强推删除；已取�
 
 本地回归覆盖：文档/单端/共享/后端/未知路径分类；应运行任务意外 skipped、cancelled 和分类失败；已提交/暂存/工作区 SQL 范围；已有目录新增合法迁移；重复规范化版本、倒序及无效引用拒绝。
 
-本记录 PR 仅修改文档及 OpenSpec 任务，用于实际验证 develop 上轻量路径：backend/web/mobile 应跳过，policy/classify/required 应成功。新库与旧库升级结论仍分开记录；Staging/E2E/回滚文档属于发布骨架。
+本记录 PR #7 已实际验证 develop 上轻量路径：backend/web/mobile skipped，policy/classify/required success（Actions 34490026565）。新库与旧库升级结论仍分开记录；Staging/E2E/回滚文档属于发布骨架。
