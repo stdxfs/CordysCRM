@@ -1,0 +1,45 @@
+name: Upstream Sync Gate
+
+on:
+  pull_request:
+    branches: [develop]
+  workflow_dispatch:
+    inputs:
+      upstream_ref:
+        description: Official tag, branch, or commit to validate
+        required: true
+        default: main
+
+permissions:
+  contents: read
+
+jobs:
+  upstream-sync:
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'upstream-sync'
+    name: upstream-sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+      - name: Check merge feasibility and report impact
+        env:
+          UPSTREAM_REF: ${{ inputs.upstream_ref || 'main' }}
+        run: scripts/governance/check-upstream-merge.sh "$UPSTREAM_REF"
+      - name: Run backend integration tests
+        run: ./mvnw -f backend/pom.xml -pl crm -am test
+      - name: Build frontend
+        run: |
+          corepack enable
+          pnpm --dir frontend install --frozen-lockfile
+          pnpm --dir frontend --filter @cordys/web build

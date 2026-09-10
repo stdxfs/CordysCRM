@@ -29,3 +29,9 @@ Java 使用四空格缩进，包名统一置于 `cn.cordys` 下；类名使用 P
 ## 提交与拉取请求规范
 
 提交信息遵循 Commitlint 强制的 Conventional Commits，例如 `fix: correct invoice validation`、`feat: add customer filter` 或 `refactor: simplify AI conditions`。提交和 PR 应保持小而聚焦，并能独立合并；开发重要功能前先创建 Issue 讨论。PR 需说明变更原因和内容，确认测试结果，并说明文档影响。关联相关 Issue；涉及可见界面变化时附截图。Issue、测试夹具和 PR 中不得包含凭据、客户数据、IP 地址或未脱敏日志。
+
+## 二开治理（强制）
+
+本 Fork 的治理基线、上游同步流程和官方文件登记见 `governance/`、`UPSTREAM_MODIFICATIONS.md` 与 `docs/governance/upstream-sync.md`。二开优先级固定为：配置、扩展点、独立模块、事件/Hook、适配器、局部覆盖、官方核心修改。新增业务默认不修改官方 Core；修改前必须在 OpenSpec 提案中说明扩展不可行原因，并登记到 `UPSTREAM_MODIFICATIONS.md`。
+
+不得改写已发布的 Migration；修复必须新增按版本排序的脚本。不得在业务 PR 中顺带升级核心依赖、批量格式化官方项目或重构无关官方代码；依赖升级与官方同步均使用独立 PR。开发前读取相关 OpenSpec 变更和 ADR，完成后更新任务、验证记录和必要文档。
