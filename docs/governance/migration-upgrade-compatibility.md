@@ -63,5 +63,6 @@ mysql --batch --skip-column-names "$CORDYS_DB_NAME" \
 - 一致性：两条路径的 `V1.9.1.2` checksum 均为 `1138237749`，`V1.9.1.9000` checksum 均为 `-215160370`，成功记录均为 140 条，目标索引均为单列 `create_time` 且仅有一个。
 - SQL 边界：目标索引缺失时创建、正确存在时跳过、同名错误定义时因重复索引名失败。预检已覆盖旧 checksum、候选 checksum、未知 checksum、失败历史、失败补偿及索引异常。
 - 应用启动：修复版本应用成功重新校验 140 条 Migration，确认 schema 无待执行项并启动 HTTP 服务；公钥接口返回正常业务响应。
+- 仓库门禁：PR #8 的 Actions `34574398551` 中 policy、治理回归、后端 Maven 测试、Web/Mobile 类型检查与构建、required 汇总全部通过。
 
 该记录证明隔离新库和模拟旧库的兼容性，不代表任何真实环境已经升级，也不替代升级前备份与真实数据副本演练。
