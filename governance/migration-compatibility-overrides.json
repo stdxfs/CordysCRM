@@ -1,0 +1,10 @@
+{
+  "overrides": [
+    {
+      "path": "backend/crm/src/main/resources/migration/1.9.1/ddl/V1.9.1_2__ga_ddl.sql",
+      "baseline_sha256": "12a93d0df8122b872f52780846d32234e59b374cc765c8f9deafae901503f235",
+      "restored_sha256": "dd4e119c52e896187e5d6f059325886882eb87b461008e0c04d37c7c501ade38",
+      "reason": "Restore the published checksum and move the upstream index to a new migration."
+    }
+  ]
+}
