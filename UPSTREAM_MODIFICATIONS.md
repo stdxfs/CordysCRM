@@ -1,6 +1,6 @@
 # 上游修改登记
 
-基线：`1Panel-dev/CordysCRM` 的 `8221b91c9f665d401b48353a4bbf48a33b1e3d3e`（`main`，2026-09-10）。此前基线为 `11ddfef84c49fce62bc4847d21df618b2b213964`。
+基线：`1Panel-dev/CordysCRM` 的 `a0ef69d31fd98c338199579353840f34ef679197`（`v1.9.1` / `main`，2026-09-12）。此前基线为 `8221b91c9f665d401b48353a4bbf48a33b1e3d3e`。
 
 本次官方自身改写 1.9.1.2 迁移以新增日志索引。本 Fork 将该历史脚本恢复为此前已发布内容，并通过新的补偿 Migration 交付索引，以兼容旧库 checksum。不会自动升级已有本地或服务器数据库。详见 docs/governance/upstream-8221-validation.md。
 
