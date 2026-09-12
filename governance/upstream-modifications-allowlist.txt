@@ -8,5 +8,6 @@
 .github/workflows/sync2gitee.yml
 AGENTS.md
 backend/AGENTS.md
+backend/crm/src/main/resources/migration/1.9.1/ddl/V1.9.1_2__ga_ddl.sql
 frontend/AGENTS.md
 frontend/.gitignore

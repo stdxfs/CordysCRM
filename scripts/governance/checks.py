@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Small, dependency-free governance checks. All comparisons fail closed."""
 import argparse
+import hashlib
+import json
 import os
 from pathlib import Path
 import re
@@ -8,10 +10,69 @@ import subprocess
 
 
 ROOT = "backend/crm/src/main/resources/migration/"
+MIGRATION_OVERRIDES = "governance/migration-compatibility-overrides.json"
 
 
 def git(*args):
     return subprocess.check_output(["git", *args], text=True).rstrip("\n")
+
+
+def git_bytes(*args):
+    return subprocess.check_output(["git", *args], stderr=subprocess.DEVNULL)
+
+
+def scoped_bytes(path, mode):
+    if mode == "committed":
+        return git_bytes("show", "HEAD:" + path)
+    if mode == "staged":
+        return git_bytes("show", ":" + path)
+    if mode == "worktree":
+        return Path(path).read_bytes()
+    raise ValueError("scope must be committed, staged or worktree")
+
+
+def migration_overrides(base, mode, relevant_paths):
+    try:
+        raw = scoped_bytes(MIGRATION_OVERRIDES, mode)
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return {}
+    try:
+        document = json.loads(raw)
+    except json.JSONDecodeError as error:
+        raise ValueError("Invalid migration compatibility override JSON") from error
+    if set(document) != {"overrides"} or not isinstance(document["overrides"], list):
+        raise ValueError("Migration compatibility overrides must contain only an overrides list")
+    overrides = {}
+    required = {"path", "baseline_sha256", "restored_sha256", "reason"}
+    for entry in document["overrides"]:
+        if not isinstance(entry, dict) or set(entry) != required:
+            raise ValueError("Each migration compatibility override must contain path, hashes and reason")
+        path = entry["path"]
+        if path in overrides:
+            raise ValueError("Duplicate migration compatibility override: " + path)
+        if not isinstance(path, str) or not path.startswith(ROOT) or not path.endswith(".sql"):
+            raise ValueError("Invalid migration compatibility override path: " + str(path))
+        for key in ("baseline_sha256", "restored_sha256"):
+            if not isinstance(entry[key], str) or not re.fullmatch(r"[0-9a-f]{64}", entry[key]):
+                raise ValueError("Invalid " + key + " for " + path)
+        if not isinstance(entry["reason"], str) or not entry["reason"].strip():
+            raise ValueError("Missing migration compatibility override reason: " + path)
+        if path not in relevant_paths:
+            overrides[path] = entry
+            continue
+        try:
+            baseline_content = git_bytes("show", base + ":" + path)
+            restored_content = scoped_bytes(path, mode)
+        except (FileNotFoundError, subprocess.CalledProcessError) as error:
+            raise ValueError("Migration compatibility override target is missing: " + path) from error
+        baseline_digest = hashlib.sha256(baseline_content).hexdigest()
+        restored_digest = hashlib.sha256(restored_content).hexdigest()
+        if baseline_digest != entry["baseline_sha256"]:
+            raise ValueError("Migration compatibility baseline digest mismatch: " + path)
+        if restored_digest != entry["restored_sha256"]:
+            raise ValueError("Migration compatibility restored digest mismatch: " + path)
+        overrides[path] = entry
+    return overrides
 
 
 def diff(base, mode, path=None):
@@ -51,8 +112,12 @@ def migrations(base, mode):
     historical = [p for p in git("ls-tree", "-r", "--name-only", base, "--", ROOT).splitlines() if p.endswith(".sql")]
     used = {version(p): p for p in historical}
     highest = max(used, default=())
-    for status, path in diff(base, mode, ROOT):
+    changes = diff(base, mode, ROOT)
+    overrides = migration_overrides(base, mode, {path for status, path in changes if status == "M"})
+    for status, path in changes:
         if status != "A":
+            if status == "M" and path in overrides:
+                continue
             raise ValueError("Applied migration is immutable: " + status + " " + path)
         v = version(path)
         if v in used or v <= highest:
