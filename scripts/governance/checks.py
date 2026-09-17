@@ -108,8 +108,10 @@ def version(path):
     return parts
 
 
-def migrations(base, mode):
+def migrations(base, mode, grandfathered_base=None):
     historical = [p for p in git("ls-tree", "-r", "--name-only", base, "--", ROOT).splitlines() if p.endswith(".sql")]
+    grandfathered = (set(git("ls-tree", "-r", "--name-only", grandfathered_base, "--", ROOT).splitlines())
+                     if grandfathered_base else set())
     used = {version(p): p for p in historical}
     highest = max(used, default=())
     changes = diff(base, mode, ROOT)
@@ -120,7 +122,7 @@ def migrations(base, mode):
                 continue
             raise ValueError("Applied migration is immutable: " + status + " " + path)
         v = version(path)
-        if v in used or v <= highest:
+        if v in used or (v <= highest and path not in grandfathered):
             raise ValueError("Duplicate or out-of-order migration: " + path)
         used[v] = path
     print("Migration check passed: base=" + base + " scope=" + mode)
@@ -179,7 +181,9 @@ def baseline(base, head_branch, base_branch):
     git("merge-base", "--is-ancestor", new, "HEAD")
     # Always check local patches, plus immutability relative to previously merged
     # local migrations. Official migration changes are handled by the report above.
-    migrations(new, "committed")
+    # A local migration that predates the official baseline may have a lower
+    # version than new official migrations; the base branch proves it is not new.
+    migrations(new, "committed", grandfathered_base=base)
     if old == new:
         migrations(base, "committed")
     else:
