@@ -483,13 +483,6 @@
       enable: true,
     },
     {
-      label: t('module.tender'),
-      key: ModuleConfigEnum.TENDER,
-      icon: 'iconicon_target',
-      groupList: [],
-      enable: true,
-    },
-    {
       label: t('module.customForm'),
       key: ModuleConfigEnum.CUSTOM_FORM,
       icon: 'iconicon_form',

@@ -652,7 +652,6 @@ export const {
   getConfigSynchronization,
   testConfigSynchronization,
   updateConfigSynchronization,
-  getTenderConfig,
   getAiModelList,
   getAiModelDetail,
   getAiModelOptions,

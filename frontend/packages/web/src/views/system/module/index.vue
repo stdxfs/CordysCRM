@@ -170,11 +170,6 @@
       icon: 'iconicon_bot',
     },
     {
-      label: t('module.tender'),
-      key: ModuleConfigEnum.TENDER,
-      icon: 'iconicon_target',
-    },
-    {
       label: t('module.customForm'),
       key: ModuleConfigEnum.CUSTOM_FORM,
       icon: 'iconicon_form',

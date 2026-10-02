@@ -17,8 +17,6 @@ import cn.cordys.crm.integration.common.request.*;
 import cn.cordys.crm.integration.dataease.DataEaseClient;
 import cn.cordys.crm.integration.sso.service.TokenService;
 import cn.cordys.crm.integration.sync.dto.ThirdSwitchLogDTO;
-import cn.cordys.crm.integration.tender.constant.TenderApiPaths;
-import cn.cordys.crm.integration.tender.dto.TenderDetailDTO;
 import cn.cordys.crm.system.constants.OrganizationConfigConstants;
 import cn.cordys.crm.system.domain.OrganizationConfig;
 import cn.cordys.crm.system.domain.OrganizationConfigDetail;
@@ -334,15 +332,6 @@ public class IntegrationConfigService {
                 );
                 configDTOs.add(dto);
 
-            } else if (Strings.CI.equals(type, ThirdDetailType.TENDER.name())) {
-                ThirdConfigBaseDTO<?> dto = buildDto(
-                        content,
-                        TenderThirdConfigRequest.class,
-                        cfg -> cfg.setTenderEnable(detail.getEnable()),
-                        ThirdConfigTypeConstants.TENDER.name()
-                );
-                configDTOs.add(dto);
-
             } else if (Strings.CI.equals(type, ThirdDetailType.QCC.name())) {
                 ThirdConfigBaseDTO<?> dto = buildDto(
                         content,
@@ -402,37 +391,7 @@ public class IntegrationConfigService {
     private List<OrganizationConfigDetail> initConfig(String organizationId, String userId) {
         // 获取或创建组织配置
         OrganizationConfig organizationConfig = getOrCreateOrganizationConfig(organizationId, userId);
-
-        // 检查当前类型下是否还有数据
-        List<OrganizationConfigDetail> organizationConfigDetails = extOrganizationConfigDetailMapper
-                .getOrganizationConfigDetails(organizationConfig.getId(), null);
-
-        OrganizationConfigDetail tenderConfig = organizationConfigDetails.stream().filter(detail -> Strings.CI.contains(detail.getType(), ThirdConfigTypeConstants.TENDER.name()))
-                .findFirst().orElse(null);
-        if (tenderConfig == null) {
-            initTender(userId, organizationConfig);
-        }
-
-        organizationConfigDetails = extOrganizationConfigDetailMapper
-                .getOrganizationConfigDetails(organizationConfig.getId(), null);
-        return organizationConfigDetails;
-    }
-
-    /**
-     * 初始化招标配置
-     *
-     * @param userId             用户ID
-     * @param organizationConfig 组织配置
-     */
-    private void initTender(String userId, OrganizationConfig organizationConfig) {
-        TenderDetailDTO tenderConfig = new TenderDetailDTO();
-        tenderConfig.setTenderAddress(TenderApiPaths.TENDER_API);
-        tenderConfig.setVerify(true);
-        OrganizationConfigDetail detail = createConfigDetail(userId, organizationConfig, JSON.toJSONString(tenderConfig));
-        detail.setType(ThirdConfigTypeConstants.TENDER.name());
-        detail.setEnable(true);
-        detail.setName(Translator.get("third.setting"));
-        organizationConfigDetailBaseMapper.insert(detail);
+        return extOrganizationConfigDetailMapper.getOrganizationConfigDetails(organizationConfig.getId(), null);
     }
 
     /**
@@ -569,17 +528,6 @@ public class IntegrationConfigService {
                 jsonContent = JSON.toJSONString(configDTO);
                 verify = configDTO.getVerify();
                 addLog(new HashMap<>(), configDTO, null, JSON.parseToMap(JSON.toJSONString(mkConfig)));
-            }
-            case TENDER -> {
-                TenderThirdConfigRequest tenderConfig = JSON.MAPPER.convertValue(configDTO.getConfig(), TenderThirdConfigRequest.class);
-                tenderConfig.setTenderAddress(TenderApiPaths.TENDER_API);
-                if (tenderConfig.getTenderEnable()) {
-                    verifyToken(token, configDTO);
-                }
-                configDTO.setConfig(tenderConfig);
-                jsonContent = JSON.toJSONString(configDTO);
-                verify = configDTO.getVerify();
-                addLog(new HashMap<>(), configDTO, null, JSON.parseToMap(JSON.toJSONString(tenderConfig)));
             }
             case QCC -> {
                 QccThirdConfigRequest qccConfig = JSON.MAPPER.convertValue(configDTO.getConfig(), QccThirdConfigRequest.class);
@@ -777,24 +725,6 @@ public class IntegrationConfigService {
                 openEnable = enable;
 
                 MaxKBThirdConfigRequest oldConfig = parseOldConfig(detail, MaxKBThirdConfigRequest.class);
-
-                addConfigLog(oldConfig, configDTO, id, config);
-            }
-
-            case TENDER -> {
-                TenderThirdConfigRequest config = JSON.MAPPER.convertValue(configDTO.getConfig(), TenderThirdConfigRequest.class);
-
-                config.setTenderAddress(TenderApiPaths.TENDER_API);
-
-                if (config.getTenderEnable()) {
-                    verifyToken(token, configDTO);
-                }
-
-                configDTO.setConfig(config);
-                jsonContent = JSON.toJSONString(configDTO);
-                openEnable = enable;
-
-                TenderThirdConfigRequest oldConfig = parseOldConfig(detail, TenderThirdConfigRequest.class);
 
                 addConfigLog(oldConfig, configDTO, id, config);
             }
@@ -1000,7 +930,6 @@ public class IntegrationConfigService {
             case LARK -> List.of(ThirdDetailType.LARK_SYNC.name());
             case DE -> List.of(ThirdDetailType.DE_BOARD.name());
             case MAXKB -> List.of(ThirdDetailType.MAXKB.name());
-            case TENDER -> List.of(ThirdDetailType.TENDER.name());
             case QCC -> List.of(ThirdDetailType.QCC.name());
             default -> Collections.emptyList();
         };
@@ -1038,10 +967,6 @@ public class IntegrationConfigService {
             case MAXKB -> {
                 MaxKBThirdConfigRequest config = JSON.MAPPER.convertValue(configDTO.getConfig(), MaxKBThirdConfigRequest.class);
                 map.put(ThirdDetailType.MAXKB.name(), config.getMkEnable());
-            }
-            case TENDER -> {
-                TenderThirdConfigRequest config = JSON.MAPPER.convertValue(configDTO.getConfig(), TenderThirdConfigRequest.class);
-                map.put(ThirdDetailType.TENDER.name(), config.getTenderEnable());
             }
             case QCC -> {
                 QccThirdConfigRequest config = JSON.MAPPER.convertValue(configDTO.getConfig(), QccThirdConfigRequest.class);
@@ -1085,9 +1010,6 @@ public class IntegrationConfigService {
             case MAXKB -> {
                 MaxKBThirdConfigRequest mkConfig = JSON.MAPPER.convertValue(configDTO.getConfig(), MaxKBThirdConfigRequest.class);
                 return tokenService.getMaxKBToken(mkConfig.getMkAddress(), mkConfig.getAppSecret()) ? "true" : null;
-            }
-            case TENDER -> {
-                return tokenService.getTender() ? "true" : null;
             }
             case QCC -> {
                 QccThirdConfigRequest qccConfig = JSON.MAPPER.convertValue(configDTO.getConfig(), QccThirdConfigRequest.class);

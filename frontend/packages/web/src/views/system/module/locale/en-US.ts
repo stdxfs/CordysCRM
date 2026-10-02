@@ -117,7 +117,6 @@ export default {
   'module.businessTitle': 'Business Title',
   'module.priceTableFormSetting': 'Price Table Form Setting',
   'module.custom_form': 'Custom Form',
-  'module.tender': 'Tender',
   'module.contract.businessNameValidateConfig': 'Business Title Form Required Settings',
   'module.contract.invoiceFormSetting': 'Invoice Form Settings',
   'module.contract.stageSetting': 'Stage Setting',

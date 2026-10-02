@@ -113,10 +113,6 @@ const defaultModuleConfig = [
     enable: true,
   },
   {
-    moduleKey: ModuleConfigEnum.TENDER,
-    enable: true,
-  },
-  {
     moduleKey: ModuleConfigEnum.CUSTOM_FORM,
     enable: true,
   },
