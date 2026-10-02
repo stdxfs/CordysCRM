@@ -11,7 +11,7 @@ Cordys CRM 是 Maven 多模块项目。`backend/framework` 存放通用基础设
 - `./mvnw install -N`：将根 Parent POM 安装到本地仓库。
 - `./mvnw clean package`：构建完整应用，包括前端。
 - `./mvnw -f backend/pom.xml test`：运行后端测试。
-- `pnpm --dir frontend install --frozen-lockfile`：严格按锁文件安装前端依赖。
+- `pnpm --dir frontend install --no-frozen-lockfile`：安装前端依赖并在本地生成锁文件。
 - `pnpm --dir frontend build`：对所有前端工作区执行类型检查和构建。
 - `pnpm --dir frontend --filter @cordys/web dev`：启动桌面端；将包名替换为 `@cordys/mobile` 可启动移动端。
 - `pnpm --dir frontend --filter @cordys/web lint`：执行 ESLint 并自动修复；样式检查使用 `lint:styles`。

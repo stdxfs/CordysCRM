@@ -27,6 +27,7 @@ coverage
 
 *.tsbuildinfo
 .node/
-# The workspace lockfile is versioned so CI uses reproducible dependencies.
+# Keep the generated workspace lockfile local.
+pnpm-lock.yaml
 package-lock.json
 yarn.lock
