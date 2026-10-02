@@ -11,7 +11,6 @@ import {
   OrderRouteEnum,
   ProductRouteEnum,
   SystemRouteEnum,
-  TenderRouteEnum,
   WorkbenchRouteEnum,
 } from '@/enums/routeEnum';
 
@@ -50,7 +49,6 @@ export const featureRouteMap: Record<string, any> = {
   [ClueRouteEnum.CLUE_MANAGEMENT]: ModuleConfigEnum.CLUE_MANAGEMENT,
   [DashboardRouteEnum.DASHBOARD]: ModuleConfigEnum.DASHBOARD,
   [AgentRouteEnum.AGENT]: ModuleConfigEnum.AGENT,
-  [TenderRouteEnum.TENDER]: ModuleConfigEnum.TENDER,
   [CustomFormRouteEnum.CUSTOM_FORM]: ModuleConfigEnum.CUSTOM_FORM,
 };
 

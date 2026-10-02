@@ -10,10 +10,7 @@
   >
     <div class="flex h-full flex-col justify-between">
       <div
-        v-if="
-          route.name?.toString().includes(DashboardRouteEnum.DASHBOARD) ||
-          route.name?.toString().includes(TenderRouteEnum.TENDER)
-        "
+        v-if="route.name?.toString().includes(DashboardRouteEnum.DASHBOARD)"
         :class="`flex justify-center py-[14px] ${appStore.menuCollapsed ? 'px-[16px]' : 'px-[24px]'}`"
       >
         <CrmSvg v-if="appStore.menuCollapsed" name="CORDYS" height="40px" width="40px" />
@@ -118,7 +115,6 @@
     CustomerRouteEnum,
     DashboardRouteEnum,
     OpportunityRouteEnum,
-    TenderRouteEnum,
     WorkbenchRouteEnum,
   } from '@/enums/routeEnum';
 

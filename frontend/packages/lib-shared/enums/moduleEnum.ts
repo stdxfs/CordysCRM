@@ -32,10 +32,7 @@ export enum ModuleConfigEnum {
   /** 订单 */
   ORDER = 'order',
 
-  /** 招标 */
-  TENDER = 'tender',
-  
-   /** 自定义表单 */
+  /** 自定义表单 */
   CUSTOM_FORM = 'customForm',
 }
 

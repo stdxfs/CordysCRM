@@ -21,7 +21,6 @@ import cn.cordys.crm.integration.lark.dto.LarkToken;
 import cn.cordys.crm.integration.lark.dto.LarkTokenParamDTO;
 import cn.cordys.crm.integration.qcc.constant.QccApiPaths;
 import cn.cordys.crm.integration.qcc.response.QccBaseResponse;
-import cn.cordys.crm.integration.tender.constant.TenderApiPaths;
 import cn.cordys.crm.integration.wecom.constant.WeComApiPaths;
 import cn.cordys.crm.integration.wecom.dto.WeComDetail;
 import cn.cordys.crm.integration.wecom.dto.WeComSendDTO;
@@ -38,7 +37,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.net.HttpURLConnection;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URL;
@@ -305,23 +303,6 @@ public class TokenService {
         );
         MaxKBResponseEntity entity = JSON.parseObject(body, MaxKBResponseEntity.class);
         return entity != null && entity.getCode() == 200;
-    }
-
-
-    public Boolean getTender() {
-        try {
-            URL url = URI.create(TenderApiPaths.TENDER_API).toURL();
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(3000);
-            connection.setReadTimeout(3000);
-            connection.connect();
-            return true;
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            return false;
-        }
-
     }
 
     public boolean getQcc(String qccAddress, String qccAccessKey, String qccSecretKey) {

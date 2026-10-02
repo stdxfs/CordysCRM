@@ -81,7 +81,7 @@
 - 使用 pnpm，不混用 npm 或 yarn 安装依赖。
 - 不手工编辑 `pnpm-lock.yaml`。
 - 仅在明确需要时添加依赖，并检查是否已有同类能力。
-- 依赖变更后运行 pnpm 安装并审查锁文件差异。
+- 依赖变更后运行 pnpm 安装；锁文件仅在本地生成，不提交。
 - 本地代理变量位于各包 `.env.development.local`。
 - 常用变量包括 `VITE_API_BASE_URL`、`VITE_DEV_DOMAIN` 和 Web 端的 `VITE_ALLOWED_HOSTS`。
 - 不提交个人服务地址、访问令牌或其他凭据。
@@ -89,8 +89,8 @@
 ## 常用命令
 
 ```bash
-# 安装锁定依赖
-pnpm --dir frontend install --frozen-lockfile
+# 安装依赖并在本地生成锁文件
+pnpm --dir frontend install --no-frozen-lockfile
 
 # 启动开发服务
 pnpm --dir frontend --filter @cordys/web dev

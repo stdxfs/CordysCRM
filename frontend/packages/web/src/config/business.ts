@@ -10,7 +10,6 @@ import {
   ThirdPartyMKConfig,
   ThirdPartyQccConfig,
   ThirdPartySQLBotConfig,
-  ThirdPartyTenderConfig,
 } from '@lib/shared/models/system/business';
 import { OrgUserInfo } from '@lib/shared/models/system/org';
 
@@ -478,11 +477,6 @@ export const defaultThirdPartMaxKBConfig: ThirdPartyMKConfig = {
   mkEnable: false,
 };
 
-export const defaultThirdPartTenderConfig: ThirdPartyTenderConfig = {
-  tenderAddress: '',
-  tenderEnable: false,
-};
-
 export const defaultThirdPartQichachaConfig: ThirdPartyQccConfig = {
   qccAddress: 'https://api.qichacha.com',
   qccAccessKey: '',
@@ -496,7 +490,6 @@ export const defaultThirdPartyConfigMap = {
   [CompanyTypeEnum.LARK]: defaultThirdPartLarkLoginConfig,
   [CompanyTypeEnum.DATA_EASE]: defaultThirdPartDEConfig,
   [CompanyTypeEnum.MAXKB]: defaultThirdPartMaxKBConfig,
-  [CompanyTypeEnum.TENDER]: defaultThirdPartTenderConfig,
   [CompanyTypeEnum.QCC]: defaultThirdPartQichachaConfig,
   [CompanyTypeEnum.INTERNAL]: {},
   [CompanyTypeEnum.WE_COM_OAUTH2]: {},

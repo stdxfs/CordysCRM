@@ -53,11 +53,6 @@ export interface ThirdPartyMKConfig {
   appSecret:string;
   mkAddress: string;
   mkEnable: boolean;
-} 
-// 大单网配置类型
-export interface ThirdPartyTenderConfig {
-  tenderAddress:string;
-  tenderEnable:boolean;
 }
 // 企查查配置类型
 export interface ThirdPartyQccConfig{

@@ -30,10 +30,6 @@ public enum ThirdConfigTypeConstants {
      */
     MAXKB,
     /**
-     * tender
-     */
-    TENDER,
-    /**
      * 企查查
      */
     QCC;

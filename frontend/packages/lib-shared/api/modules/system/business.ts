@@ -41,7 +41,6 @@ import {
   GetPersonalAiModelListUrl,
   GetPersonalFollowUrl,
   GetPersonalUrl,
-  GetTenderConfigUrl,
   GetTermCategoryListUrl,
   GetTermDetailUrl,
   GetTermDiscoveryListUrl,
@@ -351,11 +350,6 @@ export default function useProductApi(CDR: CordysAxios) {
     return CDR.get<PageConfigReturns>({ url: GetPageConfigUrl }, { ignoreCancelToken: true });
   }
 
-  // 获取招投标配置项
-  function getTenderConfig() {
-    return CDR.get<ThirdPartyResourceConfig>({ url: GetTenderConfigUrl }, { ignoreCancelToken: true });
-  }
-
   // 模型设置-列表查询
   function getAiModelList(data: TableQueryParams) {
     return CDR.post<CommonList<AiModelItem>>({ url: GetAiModelListUrl, data });
@@ -576,7 +570,6 @@ export default function useProductApi(CDR: CordysAxios) {
     deletePersonalAiModel,
     savePageConfig,
     getPageConfig,
-    getTenderConfig,
     getAiModelList,
     getAiModelDetail,
     getAiModelOptions,
